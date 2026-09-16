@@ -105,5 +105,5 @@ the service restarts.
 
 ## License
 
-No license has been selected yet. Add a license before accepting external
-contributions or distributing the project publicly.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for
+full details.

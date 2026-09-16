@@ -2,6 +2,7 @@
   "name": "zoommer-watch",
   "version": "1.0.0",
   "description": "Watches zoommer.ge categories for new arrivals and tracks price drops on chosen products.",
+  "license": "MIT",
   "main": "server.js",
   "engines": {
     "node": ">=22.5.0"
