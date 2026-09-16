@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zoommer Watch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f2eee6;
+    --surface: #fffdf8;
+    --surface-muted: #e9e4d9;
+    --line: #d8d1c4;
+    --ink: #1e2927;
+    --muted: #747971;
+    --teal: #147d73;
+    --coral: #d9654d;
+    --gold: #b98322;
+    --radius: 6px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  header {
+    position: sticky;
+    top: 0;
+    background: rgba(242, 238, 230, .94);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(12px);
+    z-index: 10;
+  }
+  .header-inner, .category-inner, main { max-width: 1120px; margin: 0 auto; }
+  .header-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px;
+  }
+  .brand { display:flex; align-items:center; gap:11px; }
+  .brand-mark {
+    display: grid; place-items: center; width: 34px; height: 34px;
+    background: var(--ink); color: var(--bg); border-radius: 50%;
+    font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  }
+  .brand strong { display: block; font-size: 15px; letter-spacing: -.02em; }
+  .brand small { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+  button { font: inherit; }
+  .text-btn, .primary-btn, .add-url button {
+    border: 0; border-radius: var(--radius); cursor: pointer; font-weight: 700;
+  }
+  .text-btn { color: var(--ink); background: transparent; border: 1px solid var(--line); padding: 9px 13px; }
+  .text-btn:hover { border-color: var(--ink); background: var(--surface); }
+
+  .categories {
+    border-bottom: 1px solid var(--line); background: var(--surface);
+  }
+  .category-inner { padding: 18px 28px 20px; }
+  .section-kicker { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .category-inner .section-kicker { margin-bottom: 11px; }
+  .category-list { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 2px; }
+  .chip {
+    flex: 0 0 auto; padding: 8px 11px; border: 1px solid var(--line); border-radius: 4px;
+    color: var(--muted); background: var(--surface); font-size: 12px; cursor: pointer;
+    user-select: none; white-space: nowrap; transition: border-color .15s, color .15s, background .15s;
+  }
+  .chip:hover { border-color: var(--teal); color: var(--ink); }
+  .chip.active { border-color: var(--teal); color: var(--teal); background: #e4f0eb; }
+  .chip input { display:none; }
+
+  main { padding: 42px 28px 70px; }
+  .masthead { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
+  h1 { margin: 6px 0 8px; font-family: 'Newsreader', Georgia, serif; font-size: clamp(40px, 6vw, 68px); line-height: .95; font-weight: 500; letter-spacing: -.045em; }
+  .lede { max-width: 520px; margin: 0; color: var(--muted); font-size: 15px; line-height: 1.55; }
+  .live-status { display: flex; align-items: center; gap: 8px; color: var(--teal); font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .live-status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+  nav.tabs { display:flex; gap: 24px; border-bottom: 1px solid var(--line); }
+  nav.tabs button {
+    background:none; border:none; color:var(--muted); padding: 0 0 13px;
+    font-size:13px; font-weight:700; cursor:pointer; border-bottom:2px solid transparent;
+  }
+  nav.tabs button.active { color: var(--ink); border-bottom-color: var(--coral); }
+  .workspace { padding-top: 24px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  .panel-head { display:flex; justify-content:space-between; align-items:center; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+  .panel-head h2 { margin:0; font-size: 14px; letter-spacing: -.01em; }
+  .panel-head span { color: var(--muted); font-size: 11px; }
+
+  .row {
+    display:flex; align-items:center; gap:12px; min-height: 64px; padding: 12px 18px;
+    border-bottom: 1px solid var(--line); border-left: 3px solid transparent;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row.new { border-left-color: var(--teal); }
+  .row.drop { border-left-color: var(--coral); }
+  .row .tag {
+    font-size: 10px; text-transform: uppercase; letter-spacing:.08em; color: var(--muted);
+  }
+  .row .name { flex:1; min-width:0; }
+  .row .name a { color: var(--ink); text-decoration:none; font-size: 14px; }
+  .row .name a:hover { text-decoration: underline; }
+  .row .price { font-size:13px; white-space:nowrap; color: var(--ink); }
+  .row time { font-size:11px; color: var(--muted); white-space:nowrap; }
+
+  .empty { color: var(--muted); padding: 46px 20px; text-align:center; font-size:13px; }
+
+  .add-url { display:flex; gap:8px; margin-bottom: 12px; }
+  .add-url input {
+    flex:1; background:var(--surface); border:1px solid var(--line); color:var(--ink);
+    padding:11px 12px; border-radius:var(--radius); font-family:inherit; font-size:13px;
+  }
+  .add-url button, .primary-btn { background: var(--ink); color: var(--surface); padding: 10px 15px; }
+  .add-url button:hover, .primary-btn:hover { background: var(--teal); }
+  .cat-select {
+    background: var(--surface); border:1px solid var(--line); color:var(--ink);
+    padding:10px 12px; border-radius:var(--radius); font-family:inherit; font-size:13px; margin-bottom:12px; width:100%;
+  }
+
+  .star-btn { background:none; border:none; font-size:18px; cursor:pointer; color: var(--line); padding: 3px; }
+  .star-btn:hover, .star-btn.active { color: var(--gold); }
+
+  .drawer-backdrop { position:fixed; inset:0; background:rgba(30,41,39,.28); display:none; z-index:20; }
+  .drawer-backdrop.open { display:block; }
+  .drawer {
+    position:fixed; top:0; right:0; height:100%; width:320px; max-width:90vw;
+    background:var(--surface); border-left:1px solid var(--line);
+    transform: translateX(100%); transition: transform .2s ease;
+    z-index:21; padding:24px; overflow-y:auto;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer h3 { font-family: 'Newsreader', Georgia, serif; font-size: 28px; font-weight: 500; margin-bottom: 28px; }
+  .field { margin-bottom:18px; }
+  .field label { display:block; font-size:11px; color:var(--muted); margin-bottom:7px; font-weight:700; }
+  .field input {
+    width:100%; background:var(--bg); border:1px solid var(--line); color:var(--ink);
+    padding:10px; border-radius:var(--radius); font-family:inherit; font-size:13px;
+  }
+  .hint { font-size:11px; color:var(--muted); margin-top:18px; line-height:1.6; }
+  @media (max-width: 760px) {
+    .header-inner, .category-inner, main { padding-left: 18px; padding-right: 18px; }
+    main { padding-top: 30px; }
+    .masthead { display:block; }
+    .live-status { margin-top: 18px; }
+    .workspace { display:block; }
+    .side-panel { margin-top: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand"><span class="brand-mark">ZW</span><div><strong>Zoommer Watch</strong></div></div>
+    <button class="text-btn" id="settingsBtn" title="Settings">Settings</button>
+  </div>
+</header>
+
+<section class="categories">
+  <div class="category-inner">
+    <div class="section-kicker">Watch categories</div>
+    <div class="category-list" id="categoryChips"></div>
+  </div>
+</section>
+
+<main>
+  <div class="masthead">
+    <div><h1>Market watch.</h1></div>
+    <div class="live-status">Monitoring active</div>
+  </div>
+  <nav class="tabs">
+    <button class="active" data-tab="alerts">Alerts</button>
+    <button data-tab="browse">Browse products</button>
+  </nav>
+  <div class="workspace">
+    <section id="alertsTab" class="panel"><div class="panel-head"><h2>Recent activity</h2><span>Last 100 events</span></div><div id="alertsList"></div></section>
+    <section id="browseTab" class="panel" style="display:none">
+      <div class="panel-head"><h2>Product catalogue</h2><span>Live prices</span></div>
+      <div style="padding:16px 18px 4px"><div class="add-url"><input id="productUrlInput" placeholder="Paste a Zoommer product link" /><button id="addProductBtn">Watch</button></div><select class="cat-select" id="categorySelect"></select></div>
+      <div id="productsList"></div>
+    </section>
+  </div>
+</main>
+
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="drawer" id="drawer">
+  <h3>Settings</h3>
+  <div class="field">
+    <label>Discord webhook URL (optional)</label>
+    <input id="webhookInput" placeholder="https://discord.com/api/webhooks/…" />
+  </div>
+  <div class="field">
+    <label>Check every (minutes)</label>
+    <input id="intervalInput" type="number" min="5" />
+  </div>
+  <button class="primary-btn" id="saveSettingsBtn" style="width:100%">Save</button>
+  <button class="text-btn" id="runNowBtn" style="width:100%; margin-top:10px;">Run check now</button>
+  <p class="hint">If prices or new arrivals stop showing up, zoommer.ge likely changed its page markup — the selectors in <span class="mono">scraper.js</span> may need a small update.</p>
+</div>
+
+<script>
+const api = (path, opts) => fetch('/api' + path, {
+  headers: { 'Content-Type': 'application/json' },
+  ...opts,
+}).then(r => r.json());
+
+let categories = [];
+let currentCategory = null;
+
+function timeAgo(iso) {
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return Math.floor(diff / 86400) + 'd ago';
+}
+
+async function loadCategories() {
+  categories = await api('/categories');
+  const chips = document.getElementById('categoryChips');
+  chips.innerHTML = categories.map(c => `
+    <label class="chip ${c.watched ? 'active' : ''}" data-slug="${c.slug}">
+      <input type="checkbox" ${c.watched ? 'checked' : ''} />
+      ${c.name}
+    </label>
+  `).join('');
+
+  chips.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const slug = chip.dataset.slug;
+      const cat = categories.find(c => c.slug === slug);
+      const watched = !cat.watched;
+      await api(`/categories/${slug}/watch`, { method: 'POST', body: JSON.stringify({ watched }) });
+      await loadCategories();
+      populateCategorySelect();
+    });
+  });
+
+  populateCategorySelect();
+}
+
+function populateCategorySelect() {
+  const select = document.getElementById('categorySelect');
+  const watched = categories.filter(c => c.watched);
+  select.innerHTML = watched.length
+    ? watched.map(c => `<option value="${c.slug}">${c.name}</option>`).join('')
+    : `<option value="">Mark a category above to browse it</option>`;
+  if (watched.length && !currentCategory) currentCategory = watched[0].slug;
+  select.value = currentCategory || '';
+}
+
+async function loadAlerts() {
+  const alerts = await api('/alerts');
+  const list = document.getElementById('alertsList');
+  if (!alerts.length) {
+    list.innerHTML = `<div class="empty">No alerts yet. Mark a category or watch a product to get started.</div>`;
+    return;
+  }
+  list.innerHTML = alerts.map(a => `
+    <div class="row ${a.type === 'new_arrival' ? 'new' : 'drop'}">
+      <div class="name">
+        <div class="tag">${a.type === 'new_arrival' ? 'New arrival' : 'Price drop'}</div>
+        <div>${a.message}</div>
+      </div>
+      <time>${timeAgo(a.created_at)}</time>
+    </div>
+  `).join('');
+}
+
+async function loadProducts() {
+  const list = document.getElementById('productsList');
+  if (!currentCategory) { list.innerHTML = ''; return; }
+  const products = await api(`/categories/${currentCategory}/products`);
+  if (!products.length) {
+    list.innerHTML = `<div class="empty">No products scanned yet — try "Run check now" in settings.</div>`;
+    return;
+  }
+  list.innerHTML = products.map(p => `
+    <div class="row">
+      <button class="star-btn ${p.watched_price ? 'active' : ''}" data-id="${p.id}" title="Watch price">★</button>
+      <div class="name"><a href="${p.url}" target="_blank" rel="noopener">${p.name}</a></div>
+      <div class="price mono">${p.last_price ?? '—'} ₾</div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.star-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const active = btn.classList.toggle('active');
+      await api(`/products/${btn.dataset.id}/watch-price`, { method: 'POST', body: JSON.stringify({ watched: active }) });
+    });
+  });
+}
+
+document.querySelectorAll('nav.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('alertsTab').style.display = btn.dataset.tab === 'alerts' ? '' : 'none';
+    document.getElementById('browseTab').style.display = btn.dataset.tab === 'browse' ? '' : 'none';
+    if (btn.dataset.tab === 'browse') loadProducts();
+  });
+});
+
+document.getElementById('categorySelect').addEventListener('change', (e) => {
+  currentCategory = e.target.value;
+  loadProducts();
+});
+
+document.getElementById('addProductBtn').addEventListener('click', async () => {
+  const input = document.getElementById('productUrlInput');
+  const url = input.value.trim();
+  if (!url) return;
+  const res = await api('/products', { method: 'POST', body: JSON.stringify({ url }) });
+  if (res.error) { alert(res.error); return; }
+  input.value = '';
+  loadProducts();
+});
+
+const drawer = document.getElementById('drawer');
+const backdrop = document.getElementById('drawerBackdrop');
+document.getElementById('settingsBtn').addEventListener('click', async () => {
+  const settings = await api('/settings');
+  document.getElementById('webhookInput').value = settings.discord_webhook || '';
+  document.getElementById('intervalInput').value = settings.poll_interval_minutes || 15;
+  drawer.classList.add('open');
+  backdrop.classList.add('open');
+});
+backdrop.addEventListener('click', () => {
+  drawer.classList.remove('open');
+  backdrop.classList.remove('open');
+});
+document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+  await api('/settings', { method: 'POST', body: JSON.stringify({
+    discord_webhook: document.getElementById('webhookInput').value.trim(),
+    poll_interval_minutes: parseInt(document.getElementById('intervalInput').value, 10) || 15,
+  }) });
+  drawer.classList.remove('open');
+  backdrop.classList.remove('open');
+});
+document.getElementById('runNowBtn').addEventListener('click', async () => {
+  await api('/run-now', { method: 'POST' });
+  alert('Check started — refresh in a minute to see results.');
+});
+
+async function refreshAll() {
+  await loadCategories();
+  await loadAlerts();
+  await loadProducts();
+}
+
+refreshAll();
+setInterval(loadAlerts, 30000);
+</script>
+</body>
+</html>
